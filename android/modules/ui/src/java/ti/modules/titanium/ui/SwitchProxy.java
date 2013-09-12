@@ -46,6 +46,6 @@ public class SwitchProxy extends TiViewProxy
 	@Override
 	public TiUIView createView(Activity activity)
 	{
-		return new TiUISwitch(this);
+		return new TiUISwitch(this, activity);
 	}
 }

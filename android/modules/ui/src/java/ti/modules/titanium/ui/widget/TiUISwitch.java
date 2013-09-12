@@ -14,6 +14,8 @@ import org.appcelerator.titanium.proxy.TiViewProxy;
 import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiUIHelper;
 import org.appcelerator.titanium.view.TiUIView;
+import org.appcelerator.titanium.util.TiRHelper;
+import org.appcelerator.titanium.util.TiRHelper.ResourceNotFoundException;
 
 import ti.modules.titanium.ui.android.AndroidModule;
 import android.view.View;
@@ -21,6 +23,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ToggleButton;
+import android.view.LayoutInflater;
+import android.content.Context;
+import android.app.Activity;
 
 public class TiUISwitch extends TiUIView
 	implements OnCheckedChangeListener
@@ -28,12 +33,30 @@ public class TiUISwitch extends TiUIView
 	private static final String TAG = "TiUISwitch";
 	
 	private boolean oldValue = false;
+
+	public static LayoutInflater inflater;
+
+	public static int switchLayoutId;
 	
-	public TiUISwitch(TiViewProxy proxy) {
+	public TiUISwitch(TiViewProxy proxy, Activity activity) {
 		super(proxy);
+
 		Log.d(TAG, "Creating a switch", Log.DEBUG_MODE);
 
+		try {
+			switchLayoutId = TiRHelper.getResource("layout.titanium_ui_switch");
+		} catch (ResourceNotFoundException e) {
+  			Log.e(TAG, "XML resources could not be found!!!", Log.DEBUG_MODE);
+  		}
+
+		//init inflater
+		if (inflater == null) {
+			inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			Log.w(TAG, "inflater just initialized:" + inflater , Log.DEBUG_MODE);
+		}
+
 		propertyChanged(TiC.PROPERTY_STYLE, null, proxy.getProperty(TiC.PROPERTY_STYLE), proxy);
+
 	}
 
 	@Override
@@ -155,15 +178,17 @@ public class TiUISwitch extends TiUIView
 
 			case AndroidModule.SWITCH_STYLE_TOGGLEBUTTON:
 				if (!(currentButton instanceof ToggleButton)) {
-					button = new ToggleButton(proxy.getActivity())
-					{
+					//button = new ToggleButton(proxy.getActivity())
+					Log.w(TAG, "inflater:" + inflater + " switchLayoutId:" + switchLayoutId, Log.DEBUG_MODE);
+					button = (CompoundButton) inflater.inflate(switchLayoutId, null);
+					/*{
 						@Override
 						protected void onLayout(boolean changed, int left, int top, int right, int bottom)
 						{
 							super.onLayout(changed, left, top, right, bottom);
 							TiUIHelper.firePostLayoutEvent(proxy);
 						}
-					};
+					};*/
 				}
 				break;
 
